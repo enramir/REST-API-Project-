@@ -304,21 +304,34 @@ app.put(BASE_API_URL+"/emp_stats/:country/:year", (req,res) =>{
 	var year = req.params.year;
 	var updateEmp = req.body;
 	var validator_bool = false;
+	var found = false;
 	
 	var updateEmployments = emp_stats.map((e) =>{
 		if(e.country == country && e.year == year){
-			validator_bool = true;
-			return updateEmp;
+			found = true;
+			
+			if(updateEmp.country != country || updateEmp.year != year){
+				return validator_bool;
+			
+			}else{
+				validator_bool = true;
+				return updateEmp;
+			}
+			
 		}else{
 			return e;
 		}
 	});
 	
-	if(validator_bool == true){
-		emp_stats = updateEmployments;
-		res.sendStatus(200,"Updated resource");
-	}else{
+	if(found == false){
 		res.sendStatus(404,"Resource does not exist");
+	
+	}else if(validator_bool == false){
+		res.sendStatus(409, "Country or year cannot be modified!!");
+	
+	}else if(validator_bool == true){
+		emp_stats = updateEmployments;
+		res.sendStatus(200,"Updated resource");	 
 	}
 });
 
